@@ -1,0 +1,279 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example
+
+    <img-slider></img-slider>
+
+@element img-slider
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://polymerlabs.github.io/img-slider
+-->
+<polymer-element name="img-slider" attributes="notitle author">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+        overflow: hidden;
+      }
+
+      .wrap{
+        position: relative;
+      }
+      polyfill-next-selector { content: ':host > trans-container'; }
+      ::content > trans-container {
+        display: block;
+        position: absolute;
+        top:0px;
+        left:0px;
+      }
+
+      polyfill-next-selector { content: ':host > trans-container'; }
+      ::content > trans-container > img {
+        width: 100%;
+      }
+    </style>
+    <div class="wrap">
+      <content></content>
+    </div>
+
+  </template>
+
+  <script>
+
+    Polymer({
+      domReady: function() {
+        var childrenNodes = this.querySelectorAll(':scope > trans-container');
+        var len = childrenNodes.length;
+        var childrenNode, i;
+        for(i = 0 ; i < len ; i++){
+          childrenNode = childrenNodes[i];
+          childrenNode.off();
+        }
+
+        childrenNodes[0].on();
+      },
+      next: function(){
+        this.showIndex++;
+      },
+      pre: function(){
+        this.showIndex--;
+      },
+      showIndexChanged: function(oldIndex){
+        var childrenNodes = this.querySelectorAll(':scope > trans-container');
+        var len           = childrenNodes.length;
+        var showIndex     = this.showIndex;
+
+        console.log(oldIndex, len);
+        if(oldIndex >= 0 && oldIndex < len){
+          console.log(oldIndex+' hide');
+          childrenNodes[oldIndex].transOff();
+        }
+
+        if(showIndex < 0){
+          this.showIndex = len-1;
+          return;
+        }
+        if(showIndex >= len){
+          this.showIndex = 0;
+          return;
+        }
+
+        childrenNodes[showIndex].transOn();
+      },
+      showIndex:0,
+      publish: {
+        'auto': 0
+      }
+    });
+
+  </script>
+
+</polymer-element>
+
+<style>
+  
+</style>
+
+<polymer-element name="trans-container">
+  <template>
+    <style>
+      :host{
+        -webkit-transition-property: all; /* Safari */
+        transition-property: all;
+        overflow: hidden;
+      }
+
+      
+      :host(.trans-off) {
+        display: none;
+      }
+
+      
+      :host(.trans-on-opacity) {
+        opacity: 1;
+      }
+      
+      :host(.trans-off-opacity) {
+        opacity: 0;
+      }
+
+      
+      :host(.trans-on-height) {
+        height: 100%;
+      }
+      
+      :host(.trans-off-height) {
+        height: 0px;
+      }
+
+      
+      :host(.trans-on-width) {
+        width: 100%;
+      }
+      
+      :host(.trans-off-width) {
+        width: 0px;
+      }
+
+      
+      :host(.trans-on-radius) {
+          border-radius: 0px;
+      }
+      
+      :host(.trans-off-radius) {
+          border-radius: 300px;
+      }
+
+      
+      :host(.trans-on-left) {
+          margin: 0px;
+      }
+      
+      :host(.trans-off-left) {
+          margin: 1000px;
+      }
+
+      
+      :host(.trans-on-right) {
+          margin-left: 1000px;
+      }
+      
+      :host(.trans-off-right) {
+          margin-left: 1000px;
+      }
+    </style>
+
+    <content></content>
+  </template>
+  <script>
+    (function(){
+      var onPrefix    = 'trans-on-';
+      var offPrefix   = 'trans-off-';
+      Polymer({
+        ready: function() {
+          var _global     = this._global = {};
+          var style       = this.style;
+          var classList   = this.classList;
+
+          _global.on_onStyle = (onPrefix + this['on-effect']).replace(' ',' '+onPrefix).split(' ');
+          _global.on_offStyle = (offPrefix + this['on-effect']).replace(' ',' '+offPrefix).split(' ');
+          _global.off_offStyle = (offPrefix + this['off-effect']).replace(' ',' '+offPrefix).split(' ');
+          _global.off_onStyle = (onPrefix + this['off-effect']).replace(' ',' '+onPrefix).split(' ');
+
+          _global.readyOff = function(){
+            console.log('readyOff');
+            this.remove.apply(this, _global.on_onStyle);
+            this.add.apply(this, _global.off_onStyle);
+          }.bind(classList)
+
+          _global.readyOn = function(){
+            console.log('readyOn');
+            this.remove.apply(this, _global.off_offStyle);
+            this.add.apply(this, _global.on_offStyle);
+          }.bind(classList)
+        },
+        transOn: function(){
+          var onDuration  = this['on-duration'];
+          this._on(onDuration);
+        },
+        on: function(){
+          this._on(0);
+        },
+        _on: function(onDuration){
+          var _global = this._global;
+          var style       = this.style;
+          var classList   = this.classList;
+
+          classList.remove('trans-off');
+          if(this.timeoutID >= 0){
+            clearTimeout(this.timeoutID);
+            this.timeoutID = -1;
+            _global.readyOn();
+            this.offsetHeight; //redarw trick
+          }
+
+          console.log('on');
+          style.transitionDuration = onDuration/1000 + 's';
+          classList.remove.apply(classList, _global.on_offStyle);
+          classList.add.apply(classList, _global.on_onStyle);
+          
+          this.timeoutID = setTimeout(function(){
+            this.timeoutID = -1;
+            _global.readyOff();
+          }.bind(this), onDuration);   
+        },
+        transOff: function(){
+          var offDuration = this['off-duration'];
+          this._off(offDuration);
+        },
+        off: function(){
+          this._off(0);
+        },
+        _off: function(onDuration){
+          var _global     = this._global;
+          var style       = this.style;
+          var classList   = this.classList;
+
+          if(this.timeoutID >= 0){
+            clearTimeout(this.timeoutID);
+            this.timeoutID = -1;
+            _global.readyOff();
+            this.offsetHeight; //redarw trick
+          }
+
+          console.log('off');
+          style.transitionDuration = onDuration/1000 + 's';
+          classList.remove.apply(classList, _global.off_onStyle);
+          classList.add.apply(classList, _global.off_offStyle);
+          
+          this.timeoutID = setTimeout(function(){
+            this.timeoutID = -1;
+            _global.readyOn();
+            classList.add('trans-off');
+          }.bind(this), onDuration); 
+        },
+        timeoutID:-1,
+        publish: {
+          'on-effect'   : 'opacity',
+          'off-effect'  : 'opacity',
+          'on-duration' : 2000,
+          'off-duration': 2000
+        }
+      });
+    })();
+  </script>
+</polymer-element>

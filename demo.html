@@ -1,0 +1,36 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>img-slider Demo</title>
+
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="img-slider.html">
+
+</head>
+<body unresolved>
+
+  <p>An example of using <code>&lt;img-slider&gt;</code>:</p>
+
+  <img-slider style="width:500px; height:500px;">
+    <trans-container id="a" off-effect="opacity" on-effect="opacity">
+      <img src="https://avvesione.files.wordpress.com/2013/07/kiniro_mosaic-01-alice-english-transfer_student-twintails-blonde_hair-loli.jpg"></img>
+    </trans-container>
+    <trans-container id="b" off-effect="opacity left" on-effect="opacity left">
+      <img src="http://upload.inven.co.kr/upload/2014/05/05/bbs/i3786303808.jpg"></img>
+    </trans-container>
+    <trans-container id="c" off-effect="opacity radius" on-effect="opacity width radius">
+      <img src="http://ftp.gameshot.net/community/free/4294890100/20130627170051_4f1525a4.jpg"></img>
+    </trans-container>
+  </img-slider>
+</body>
+</html>
